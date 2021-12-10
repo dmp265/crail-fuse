@@ -2,9 +2,6 @@ plugins {
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '7.1.0'
     id 'net.researchgate.release' version '2.8.1'
-    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
-    id 'maven-publish'
-    id 'signing'
 }
 
 repositories {
@@ -32,82 +29,18 @@ dependencies {
     api 'com.github.jnr:jnr-ffi:2.2.7'
     api 'com.github.jnr:jnr-posix:3.1.10'
     api 'com.github.jnr:jnr-constants:0.10.2'
-
-    testImplementation 'junit:junit:4.13.2'
+    api 'org.slf4j:slf4j-api:1.7.32'
+    api 'com.ibm.narpc:narpc:1.5'
+    api 'commons-cli:commons-cli:1.5.0'
+    api 'org.apache.crail:crail-client:1.2-incubating'
+    api 'org.apache.crail:crail-storage:1.2-incubating'
+    api 'org.apache.crail:crail-storage-narpc:1.2-incubating'
+    api 'org.apache.crail:crail-rpc:1.2-incubating'
+    api 'org.apache.crail:crail-rpc-narpc:1.2-incubating'
 }
 
 release {
-    newVersionCommitMessage = '[jnr-fuse release] - '
-    preTagCommitMessage = '[jnr-fuse release] - pre tag commit: '
-    buildTasks = ['clean', 'assemble', 'publishToSonatype', 'closeAndReleaseSonatypeStagingRepository']
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = 'jnr-fuse'
-            from components.java
-
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }
-            pom {
-                name = 'jnr-fuse'
-                description = 'jnr-fuse is a FUSE implementation in java using Java Native Runtime (JNR).'
-                url = 'https://github.com/SerCeMan/jnr-fuse'
-                licenses {
-                    license {
-                        name = 'The MIT License (MIT)'
-                        url = 'https://opensource.org/licenses/MIT'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'SerCe'
-                        name = 'Sergey Tselovalnikov'
-                        email = 'sergeicelov@gmail.com'
-                    }
-                }
-
-                scm {
-                    url = 'https://github.com/SerCeMan/jnr-fuse'
-                    connection = 'scm:git:git@github.com:SerCeMan/jnr-fuse.git'
-                    developerConnection = 'scm:git:git@github.com:SerCeMan/jnr-fuse.git'
-                }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            // A test repository in the build repository
-            // allowing easy verification of published artifacts
-            name = 'projectLocal'
-            url = file("${buildDir}/repo")
-        }
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            username.set(providers.environmentVariable("SONATYPE_LOGIN").forUseAtConfigurationTime())
-            password.set(providers.environmentVariable("SONATYPE_PASSWORD").forUseAtConfigurationTime())
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.mavenJava
-    setRequired {
-        gradle.taskGraph.allTasks.any {
-            it.name == 'publishToSonatype'
-        }
-    }
+    newVersionCommitMessage = '[crail-fuse release] - '
+    preTagCommitMessage = '[crail-fuse release] - pre tag commit: '
+    buildTasks = ['clean', 'assemble']
 }
