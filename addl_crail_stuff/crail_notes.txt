@@ -1,0 +1,52 @@
+For this project, I used Crail with its default TCP/DRAM storage tier
+configuration. I had access to two nodes: atlas-5, which I used as the namenode
+and client and atlas-6, which I used as the datanode. The setup, installation,
+and configuration process on both was identical unless otherwise noted. Since I
+was logged in as user midhul, I created /home/midhul/disagg-memory (<w_dir>),
+which functioned as my root working directory. Crail was installed according to
+the documentation on both nodes in <w_dir> as <w_dir>/<crail> and $CRAIL_HOME
+was set to <w_dir>/<crail>. You can find the crail-site.conf I used in this
+directory. The one strange thing I noticed about configuration is that crail
+wanted an actual IP address instead of a hostname (even though both nodes are
+on the same network). I created directories <w_dir>/cache and <w_dir>/data for
+Crail to store data in. I also created <w_dir>/crail_env (also included in this
+directory), which can be sourced to help initializing several environment
+variables.
+
+To start the mountable filesystem I used the following workflow:
+Terminal 1: atlas-5:<w_dir>$ $CRAIL_HOME/bin/crail namenode
+            (Leave open to monitor output)
+
+Terminal 2: atlas-6:<w_dir>$ $CRAIL_HOME/bin/crail datanode
+            (Leave open to monitor output)
+
+Terminal 3: atlas-5:<w_dir>$ cd <crail-fuse>
+            atlas-5:<crail-fuse>$ ./gradlew shadowJar # Only needs to be done
+        once to build
+            atlas-5:<crail-fuse>$ java dmp.crailfuse.CrailFuse
+            (Leave open to monitor output)
+
+Terminal 4: (Interface with the now-mounted filesystem. For example:)
+            atlas-5:<w_dir>$ stat /tmp/crail-fuse
+            atlas-5:<w_dir>$ cp <somefile> /tmp/crail-fuse
+            atlas-5:<w_dir>$ cat /tmp/crail-fuse/<somefile>
+
+Keep in mind that I only implemented basic functionality for this filesystem
+(stat/open/close/read/write/unlink) and data gets added in 4KB page amounts, so
+I've noticed a couple strange things about the filesystem while interacting with
+it through the shell, but I don't believe any of them should make a difference
+in your intended use case. For example:
+- It does not support directories, so you cannot call `ls`, and any files with a
+"/" in their name will throw an error.
+- If you call `less` or `vim` on a file in the system, there will be null
+characters for the remainder of the last page at the bottom of the terminal
+output. The filesystem also doesn't seem to like vim, and sometimes cuts off the
+bottom of the file (even though it shows the full file for less).
+- I store each page of a file in the Crail store as a Key-Value file with the
+following name format: "<filename>.#<pageno>" so keep in mind that the substring
+".#" is used as a delimiter when designing your disaggregated memory system.
+
+The directory that will become the mount point needs to be created before
+launching the filesystem. The default mountpoint is /tmp/crail-mount, but you
+can use a different mount point by adding an optional argument while launching
+the system.

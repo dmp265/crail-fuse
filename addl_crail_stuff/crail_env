@@ -1,0 +1,2 @@
+export CRAIL_HOME=<w_dir>/<crail>
+export CLASSPATH=$CLASSPATH:<crail-fuse>/build/libs/crail-fuse-0.1-shadow.jar
