@@ -26,7 +26,7 @@ tasks.withType(Javadoc).configureEach {
 }
 
 dependencies {
-    api 'com.github.jnr:jnr-ffi:2.2.7'
+    api 'com.github.jnr:jnr-ffi:2.2.13'
     api 'com.github.jnr:jnr-posix:3.1.10'
     api 'com.github.jnr:jnr-constants:0.10.2'
     api 'org.slf4j:slf4j-api:1.7.32'
